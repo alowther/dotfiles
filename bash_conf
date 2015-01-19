@@ -1,0 +1,54 @@
+# CUSTOM BELOW
+# SSH agent setup
+IDLIFE=60
+IDLIFE=43720
+# skip agent setup if agent was forwarded
+/usr/bin/ssh-add -l > /dev/null 2>&1
+SA_EXIT=$?
+if [ "$SA_EXIT" -ne "0" ]; then
+    # not in $HOME in case of exported /home
+    AGENTFILE=/tmp/ssh-agent-`whoami`
+    if [ -r $AGENTFILE ]; then
+        . $AGENTFILE > /dev/null
+    fi
+    # if there is no agent, or in case the file is out of date
+    if [ -z "$SSH_AUTH_SOCK" -o ! -r "$SSH_AUTH_SOCK" ]; then
+        AGENTCODE=`ssh-agent -t $IDLIFE`
+        echo $AGENTCODE > $AGENTFILE
+        chmod 600 $AGENTFILE
+        eval `echo $AGENTCODE`
+    fi
+    # add identity to agent
+    /usr/bin/ssh-add -l > /dev/null 2>&1
+    SA_EXIT=$?
+    if [ "$SA_EXIT" -eq "1" ]; then
+        # only prompt on login, not in every screen window if I'm ignoring it
+        if [ "$SHLVL" -eq "0" ]; then
+            echo "no keys in running agent - running ssh-add"
+            /usr/bin/ssh-add
+        else
+            echo "no keys in running agent - use ssh-add to use pk auth"
+        fi
+    fi
+fi
+
+
+# create SSH aliases
+alias on="ssh"
+alias aon="ssh -l admin"
+alias ron="ssh -l root"
+alias kon="ssh -K"
+KH_FILE=$HOME/.ssh/known_hosts
+if [ -r "$KH_FILE" ]; then
+    # pull short hostnames from known hosts file to create aliases to connect to them easier
+    #for kh in `/bin/cat .ssh/known_hosts | /bin/grep -v "^[0-9]" | /usr/bin/cut -d " " -f 1 | /usr/bin/cut -d , -f 1 | /usr/bin/cut -d . -f 1 | /usr/bin/sort | /usr/bin/uniq`; do
+    for kh in `/bin/cat $HOME/.ssh/known_hosts | /bin/sed -e "s/^\([a-zA-Z0-9-]*\).*$/\1/g" -e "/^[0-9]/d"`; do
+        alias on${kh}="ssh $kh"
+        alias ron${kh}="ssh -l root $kh"
+    done
+fi
+
+# so login isn't completely silent
+#echo "WELCOME to `hostname -s`"
+test $SHLVL -eq 1 && hostname -s
+

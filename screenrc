@@ -1,0 +1,19 @@
+startup_message off
+defscrollback 10000
+
+# detach on hangup
+autodetach on
+
+# Remove 'xoff' and 'xon' bindings
+bind q
+bind ^q
+bind s
+bind ^s
+
+# fix colors
+attrcolor b ".I"
+termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+defbce "on"
+
+# turn off visual bell
+#vbell off 
