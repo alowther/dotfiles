@@ -38,6 +38,10 @@ let g:mapleader = ","
 let g:NERDTreeWinPos = "right"
 nnoremap <leader>e :NERDTreeToggle<CR>
 
+" airline settings
+" lots of themes have inactive buffer name same color as background
+let g:airline_theme = "bubblegum"
+
 " personal preferences
 set background=dark
 set tabstop=8
@@ -106,4 +110,8 @@ map <C-l> <C-w>l
 set nobackup
 set noswapfile
 
-
+" different settings for file types
+autocmd FileType make set noexpandtab
+autocmd FileType yaml set tabstop=2
+autocmd FileType yaml set softtabstop=2
+autocmd FileType yaml set shiftwidth=2
