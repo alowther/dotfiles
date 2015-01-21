@@ -22,6 +22,7 @@ if filereadable($HOME . "/.vim/bundle/Vundle.vim/README.md")
     Plugin 'scrooloose/nerdtree'
     Plugin 'bling/vim-airline'
     Plugin 'kien/ctrlp.vim'
+    Plugin 'scrooloose/nerdcommenter'
 
 
     call vundle#end()            " required
