@@ -110,6 +110,13 @@ map <C-l> <C-w>l
 set nobackup
 set noswapfile
 
+" vimrc example
+if has('mouse')
+  set mouse=a
+endif
+" Map Y to act like D and C, i.e. to yank until EOL, rather than act as yy,
+map Y y$
+
 " different settings for file types
 autocmd FileType make set noexpandtab
 autocmd FileType yaml set tabstop=2
