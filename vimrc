@@ -23,7 +23,10 @@ if filereadable($HOME . "/.vim/bundle/Vundle.vim/README.md")
     Plugin 'bling/vim-airline'
     Plugin 'kien/ctrlp.vim'
     Plugin 'scrooloose/nerdcommenter'
-
+    "Plugin 'myusuf3/numbers.vim'
+    " doesn't handle old versions smartly
+    "Plugin 'Shougo/neocomplete.vim'
+    "Plugin 'Shougo/neocomplcache.vim'
 
     call vundle#end()            " required
     filetype plugin indent on    " required
