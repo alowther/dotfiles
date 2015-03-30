@@ -1,4 +1,9 @@
 # CUSTOM BELOW
+
+# we can force 256 color support in tmux
+# disabled for now, as we usually use putty and set the terminal to xterm-256color, which also works
+#alias tmux="tmux -2"
+
 # SSH agent setup
 IDLIFE=60
 IDLIFE=43720
@@ -52,3 +57,43 @@ fi
 #echo "WELCOME to `hostname -s`"
 test $SHLVL -eq 1 && hostname -s
 
+# edit all files in a directory
+function editd() {
+    if [[ $# -ne 1 ]]; then
+        return
+    fi
+    vim $(find $1 -type f)
+}
+
+# openssl handy
+function pfx2pem() {
+    if [[ $# -ne 1 ]]; then
+        return
+    fi
+    local in=$1
+    local out=$(basename $1 .pfx).pem
+    openssl pkcs12 -in ${in} -out ${out} -nodes
+}
+
+function pfx2cer() {
+    if [[ $# -ne 1 ]]; then
+        return
+    fi
+    local in=$1
+    local out=$(basename $1 .pfx).cer
+    openssl pkcs12 -in ${in} -clcerts -nokeys -out ${out}
+}
+
+function pfx2key() {
+    if [[ $# -ne 1 ]]; then
+        return
+    fi
+    local in=$1
+    local out=$(basename $1 .pfx).key
+    openssl pkcs12 -in ${in} -nocerts -out ${out} -nodes
+}
+
+function pfx2files() {
+    pfx2key $@
+    pfx2cer $@
+}
