@@ -91,6 +91,7 @@ function pfx2key() {
     local in=$1
     local out=$(basename $1 .pfx).key
     openssl pkcs12 -in ${in} -nocerts -out ${out} -nodes
+    chmod 600 ${out}
 }
 
 function pfx2files() {
