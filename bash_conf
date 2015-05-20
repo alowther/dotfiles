@@ -4,6 +4,12 @@
 # disabled for now, as we usually use putty and set the terminal to xterm-256color, which also works
 #alias tmux="tmux -2"
 
+# history
+HISTCONTROL=ignoreboth
+shopt -s histappend
+HISTSIZE=10000
+HISTFILESIZE=20000
+
 # SSH agent setup
 IDLIFE=60
 IDLIFE=43720
@@ -98,3 +104,6 @@ function pfx2files() {
     pfx2key $@
     pfx2cer $@
 }
+
+# safe term
+alias xt="export TERM=xterm"
