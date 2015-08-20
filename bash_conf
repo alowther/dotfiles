@@ -105,5 +105,10 @@ function pfx2files() {
     pfx2cer $@
 }
 
+# any key resumes flow after Ctrl-S, not just Ctrl-Q
+stty ixany
+# can disable Ctrl-S
+# stty -ixon
+
 # safe term
 alias xt="export TERM=xterm"
