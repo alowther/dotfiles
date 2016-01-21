@@ -112,3 +112,23 @@ stty ixany
 
 # safe term
 alias xt="export TERM=xterm"
+
+# pause until the next minute comes around, useful for testing
+function testpause() {
+    while [[ 1 ]]; do
+        local now_s=$(date +%S)
+        if [[ "${now_s}" == "00" ]]; then
+            break
+        fi
+        # watch out for leading 0, force base 10
+        if [[ $(( 10#${now_s} )) -ge 59 ]]; then
+            echo -n "!"
+            sleep 0.1
+        else
+            echo -n "${now_s} "
+            sleep $(( 1 + 49 / 10#${now_s} ))
+        fi
+    done
+    echo
+    date
+}
