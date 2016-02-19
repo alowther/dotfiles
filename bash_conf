@@ -132,3 +132,11 @@ function testpause() {
     echo
     date
 }
+
+function pauseuntil() {
+    local current_epoch=$(date +%s)
+    local target_epoch=$(date -d $@ +%s)
+    local sleep_seconds=$(( $target_epoch - $current_epoch ))
+    echo "sleeping: ${sleep_seconds}"
+    sleep $sleep_seconds
+}
