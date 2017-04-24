@@ -13,36 +13,41 @@ HISTFILESIZE=20000
 # SSH agent setup
 IDLIFE=60
 IDLIFE=43720
-# skip agent setup if agent was forwarded
-/usr/bin/ssh-add -l > /dev/null 2>&1
-SA_EXIT=$?
-if [ "$SA_EXIT" -ne "0" ]; then
-    # not in $HOME in case of exported /home
-    AGENTFILE=/tmp/ssh-agent-`whoami`
-    if [ -r $AGENTFILE ]; then
-        . $AGENTFILE > /dev/null
-    fi
-    # if there is no agent, or in case the file is out of date
-    if [ -z "$SSH_AUTH_SOCK" -o ! -r "$SSH_AUTH_SOCK" ]; then
-        AGENTCODE=`ssh-agent -t $IDLIFE`
-        echo $AGENTCODE > $AGENTFILE
-        chmod 600 $AGENTFILE
-        eval `echo $AGENTCODE`
-    fi
-    # add identity to agent
+function ssha() {
+    # skip agent setup if agent was forwarded
     /usr/bin/ssh-add -l > /dev/null 2>&1
     SA_EXIT=$?
-    if [ "$SA_EXIT" -eq "1" ]; then
-        # only prompt on login, not in every screen window if I'm ignoring it
-        if [ "$SHLVL" -eq "0" ]; then
-            echo "no keys in running agent - running ssh-add"
-            /usr/bin/ssh-add
-        else
-            echo "no keys in running agent - use ssh-add to use pk auth"
+    if [ "$SA_EXIT" -ne "0" ]; then
+        # not in $HOME in case of exported /home
+        AGENTFILE=/tmp/ssh-agent-`whoami`
+        if [ -r $AGENTFILE ]; then
+            . $AGENTFILE > /dev/null
+        fi
+        # if there is no agent, or in case the file is out of date
+        if [ -z "$SSH_AUTH_SOCK" -o ! -r "$SSH_AUTH_SOCK" ]; then
+            AGENTCODE=`ssh-agent -t $IDLIFE`
+            echo $AGENTCODE > $AGENTFILE
+            chmod 600 $AGENTFILE
+            eval `echo $AGENTCODE`
+        fi
+        # add identity to agent
+        /usr/bin/ssh-add -l > /dev/null 2>&1
+        SA_EXIT=$?
+        if [ "$SA_EXIT" -eq "1" ]; then
+            # only prompt on login, not in every screen window if I'm ignoring it
+            if [ "$SHLVL" -eq "0" ]; then
+                echo "no keys in running agent - running ssh-add"
+                /usr/bin/ssh-add
+            else
+                echo "no keys in running agent - use ssh-add to use pk auth"
+            fi
         fi
     fi
-fi
+}
 
+ssha_hosts=()
+# start ssh agent on specified hosts
+[[ ${ssha_hosts[@]} =~ $(hostname -s) ]] && ssha
 
 # create SSH aliases
 alias on="ssh"
@@ -140,3 +145,6 @@ function pauseuntil() {
     echo "sleeping: ${sleep_seconds}"
     sleep $sleep_seconds
 }
+
+# systemd reco
+alias psc='ps xawf -eo pid,user,cgroup,args'

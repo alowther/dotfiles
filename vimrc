@@ -20,9 +20,13 @@ if filereadable($HOME . "/.vim/bundle/Vundle.vim/README.md")
     Plugin 'tpope/vim-fugitive'
     Plugin 'tpope/vim-sensible'
     Plugin 'scrooloose/nerdtree'
-    Plugin 'bling/vim-airline'
+    Plugin 'vim-airline/vim-airline'
+    Plugin 'vim-airline/vim-airline-themes'
     Plugin 'kien/ctrlp.vim'
     Plugin 'scrooloose/nerdcommenter'
+    Plugin 'tmhedberg/SimpylFold'
+    Plugin 'jistr/vim-nerdtree-tabs'
+    Plugin 'vim-syntastic/syntastic'
     "Plugin 'myusuf3/numbers.vim'
     " doesn't handle old versions smartly
     "Plugin 'Shougo/neocomplete.vim'
@@ -44,6 +48,21 @@ nnoremap <leader>e :NERDTreeToggle<CR>
 " airline settings
 " lots of themes have inactive buffer name same color as background
 let g:airline_theme = "bubblegum"
+"let g:airline_theme = "term"
+
+" syntastic recommended
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+" pyflakes just does compile issues
+if filereadable("/usr/bin/pyflakes")
+    let g:syntastic_python_checkers = ['python','pyflakes']
+endif
 
 " personal preferences
 set background=dark
@@ -60,6 +79,7 @@ nmap <leader><space> :nohlsearch<CR>
 nmap <leader>ws :set list!<CR>
 nmap <leader>R :so $MYVIMRC<CR>
 nnoremap <leader>i :set list!<cr>
+nnoremap <leader>z za
 " Quickly get out of insert mode without your fingers having to leave the
 " home row (either use 'jj' or 'jk')
 inoremap jj <Esc>
@@ -120,8 +140,20 @@ endif
 " Map Y to act like D and C, i.e. to yank until EOL, rather than act as yy,
 map Y y$
 
+" folding
+set foldlevel=99
+
 " different settings for file types
 autocmd FileType make set noexpandtab
 autocmd FileType yaml set tabstop=2
 autocmd FileType yaml set softtabstop=2
 autocmd FileType yaml set shiftwidth=2
+
+au BufNewFile,BufRead *.py
+    \ set tabstop=4 |
+    \ set softtabstop=4 |
+    \ set shiftwidth=4 |
+    \ set expandtab |
+    \ set autoindent |
+    \ set fileformat=unix
+"\ set textwidth=79
