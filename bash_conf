@@ -1,8 +1,15 @@
 # CUSTOM BELOW
 
+# add to .bashrc
+# [ -r $HOME/.bash_conf ] && . $HOME/.bash_conf
+
 # we can force 256 color support in tmux
 # disabled for now, as we usually use putty and set the terminal to xterm-256color, which also works
 #alias tmux="tmux -2"
+
+# ugly tmux hack so home directory isn't expanded to physical path
+# window splits and new windows in other directories are still a problem
+if [ -n "${TMUX_PANE}" ] && [ -e "${PWD}/.bashrc" ]; then cd $HOME ; fi
 
 # history
 HISTCONTROL=ignoreboth
