@@ -45,12 +45,13 @@ function ssha() {
     fi
 }
 
-ssha_hosts=()
+ssha_hosts=('ksq-b-cnc-p05' 'ksq-b-cnc-p08')
 # start ssh agent on specified hosts
 [[ ${ssha_hosts[@]} =~ $(hostname -s) ]] && ssha
 
 # create SSH aliases
 alias on="ssh"
+alias sshpw="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o GSSAPIAuthentication=no"
 alias aon="ssh -l admin"
 alias ron="ssh -l root"
 alias kon="ssh -K"
