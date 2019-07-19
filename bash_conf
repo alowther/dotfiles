@@ -61,6 +61,7 @@ alias on="ssh"
 alias sshpw="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o GSSAPIAuthentication=no"
 alias aon="ssh -l admin"
 alias ron="ssh -l root"
+alias ton="ssh -l twig"
 alias kon="ssh -K"
 KH_FILE=$HOME/.ssh/known_hosts
 if [ -r "$KH_FILE" ]; then

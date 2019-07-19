@@ -6,6 +6,10 @@ unbind-key C-a
 bind-key C-a last-window
 bind-key a send-prefix
 
+# update defaults to disable preview
+bind-key s choose-tree -sN
+bind-key w choose-tree -wN
+
 # Easy config reload
 bind-key R source-file ~/.tmux.conf \; display-message "tmux.conf reloaded."
 
@@ -48,7 +52,7 @@ bind k select-pane -U
 bind l select-pane -R
 
 # screen keys committed to muscle memory
-bind-key '"' choose-window
+bind-key '"' choose-window -wN
 # new split window keys
 ## new window use home, new pane use cwd - different in 1.9 and newer - http://unix.stackexchange.com/questions/101949/new-tmux-panes-go-to-the-same-directory-as-the-current-pane-new-tmux-windows-go
 #set -g default-path "~"
