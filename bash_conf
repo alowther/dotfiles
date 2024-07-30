@@ -21,12 +21,12 @@ HISTFILESIZE=20000
 IDLIFE=60
 IDLIFE=43720
 function ssha() {
+    # not in $HOME in case of exported /home
+    AGENTFILE=/tmp/ssh-agent-`whoami`
     # skip agent setup if agent was forwarded
     /usr/bin/ssh-add -l > /dev/null 2>&1
     SA_EXIT=$?
     if [ "$SA_EXIT" -ne "0" ]; then
-        # not in $HOME in case of exported /home
-        AGENTFILE=/tmp/ssh-agent-`whoami`
         if [ -r $AGENTFILE ]; then
             . $AGENTFILE > /dev/null
         fi
@@ -49,12 +49,24 @@ function ssha() {
                 echo "no keys in running agent - use ssh-add to use pk auth"
             fi
         fi
+    else
+        # if agent was forwarded make a file old/stale sessions can source to fix themselves
+        echo write ${AGENTFILE}
+        install -m 0600 /dev/null ${AGENTFILE}
+        cat <<EOF > ${AGENTFILE}
+SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+EOF
     fi
 }
 
-ssha_hosts=('ksq-b-cnc-p05' 'ksq-b-cnc-p08')
-# start ssh agent on specified hosts
-[[ ${ssha_hosts[@]} =~ $(hostname -s) ]] && ssha
+# convenience function for shells broken by stale settings
+ssha_fix() {
+    ssha
+    source ${AGENTFILE}
+}
+
+# start ssh agent if flag file exists
+[[ -e "${HOME}/.ssha_enable" ]] && ssha
 
 # create SSH aliases
 alias on="ssh"
@@ -157,3 +169,6 @@ function pauseuntil() {
 
 # systemd reco
 alias psc='ps xawf -eo pid,user,cgroup,args'
+
+alias vimf='vim $(find . -type f)'
+alias t0='tmux a -t 0 || tmux'

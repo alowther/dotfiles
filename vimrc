@@ -1,5 +1,4 @@
 set nocompatible              " be iMproved, required
-filetype off                  " required
 
 " Set up Vundle:
 " $ git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
@@ -10,6 +9,7 @@ filetype off                  " required
 
 
 if filereadable($HOME . "/.vim/bundle/Vundle.vim/README.md")
+    filetype off                  " required
     " set the runtime path to include Vundle and initialize
     set rtp+=~/.vim/bundle/Vundle.vim
     call vundle#begin()
@@ -26,7 +26,8 @@ if filereadable($HOME . "/.vim/bundle/Vundle.vim/README.md")
     Plugin 'scrooloose/nerdcommenter'
     Plugin 'tmhedberg/SimpylFold'
     Plugin 'jistr/vim-nerdtree-tabs'
-    Plugin 'vim-syntastic/syntastic'
+    "Plugin 'vim-syntastic/syntastic'
+    Plugin 'pearofducks/ansible-vim'
     "Plugin 'myusuf3/numbers.vim'
     " doesn't handle old versions smartly
     "Plugin 'Shougo/neocomplete.vim'
@@ -64,13 +65,17 @@ if filereadable("/usr/bin/pyflakes")
     let g:syntastic_python_checkers = ['python','pyflakes']
 endif
 
+let g:syntastic_enable_ansible_checker = 0
+let g:syntastic_mode_map = { 'passive_filetypes': ['ansible'] }
+
 " personal preferences
 set background=dark
-set tabstop=8
+set tabstop=4
 set expandtab
 set softtabstop=4
 set shiftwidth=4
 set shiftround
+set list
 
 " custom commands
 nmap <leader>l :setlocal number!<CR>
@@ -143,13 +148,13 @@ map Y y$
 " folding
 set foldlevel=99
 
+" mixing Makefile buffers and other buffers messing me up
+autocmd FileType * set expandtab tabstop=4 softtabstop=4 shiftwidth=4
 " different settings for file types
-autocmd FileType make set noexpandtab
-autocmd FileType yaml set tabstop=2
-autocmd FileType yaml set softtabstop=2
-autocmd FileType yaml set shiftwidth=2
+autocmd FileType make set noexpandtab list
+autocmd FileType yaml set expandtab tabstop=2 softtabstop=2 shiftwidth=2
 
-au BufNewFile,BufRead *.py
+autocmd BufNewFile,BufRead *.py
     \ set tabstop=4 |
     \ set softtabstop=4 |
     \ set shiftwidth=4 |
@@ -157,3 +162,8 @@ au BufNewFile,BufRead *.py
     \ set autoindent |
     \ set fileformat=unix
 "\ set textwidth=79
+
+" ansible
+au BufRead,BufNewFile */playbooks/*.yml set filetype=yaml.ansible
+let g:ansible_unindent_after_newline = 1
+let g:ansible_attribute_highlight = "a"
