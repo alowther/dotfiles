@@ -171,4 +171,4 @@ function pauseuntil() {
 alias psc='ps xawf -eo pid,user,cgroup,args'
 
 alias vimf='vim $(find . -type f)'
-alias t0='tmux a -t 0 || tmux'
+alias t0='ssha_fix; tmux a -t 0 || tmux'
