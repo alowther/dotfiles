@@ -21,6 +21,7 @@ HISTFILESIZE=20000
 IDLIFE=60
 IDLIFE=43720
 function ssha() {
+#    set -x
     # not in $HOME in case of exported /home
     AGENTFILE=/tmp/ssh-agent-`whoami`
     # skip agent setup if agent was forwarded
@@ -36,6 +37,14 @@ function ssha() {
             echo $AGENTCODE > $AGENTFILE
             chmod 600 $AGENTFILE
             eval `echo $AGENTCODE`
+        else
+            /usr/bin/ssh-add -l > /dev/null 2>&1
+            if [ "${?}" -eq "2" ]; then
+                AGENTCODE=`ssh-agent -t $IDLIFE`
+                echo $AGENTCODE > $AGENTFILE
+                chmod 600 $AGENTFILE
+                eval `echo $AGENTCODE`
+            fi
         fi
         # add identity to agent
         /usr/bin/ssh-add -l > /dev/null 2>&1
@@ -50,13 +59,16 @@ function ssha() {
             fi
         fi
     else
-        # if agent was forwarded make a file old/stale sessions can source to fix themselves
-        echo write ${AGENTFILE}
-        install -m 0600 /dev/null ${AGENTFILE}
-        cat <<EOF > ${AGENTFILE}
-SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+        if [ "$SHLVL" -eq "0" ]; then
+            # if agent was forwarded make a file old/stale sessions can source to fix themselves
+            echo write ${AGENTFILE}
+            install -m 0600 /dev/null ${AGENTFILE}
+            cat <<EOF > ${AGENTFILE}
+SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
 EOF
+        fi
     fi
+#    set +x
 }
 
 # convenience function for shells broken by stale settings
@@ -116,6 +128,15 @@ function pfx2cer() {
     openssl pkcs12 -in ${in} -clcerts -nokeys -out ${out}
 }
 
+function pfx2chain() {
+    if [[ $# -ne 1 ]]; then
+        return
+    fi
+    local in=$1
+    local out=$(basename $1 .pfx).chain
+    openssl pkcs12 -in ${in} -cacerts -nokeys -out ${out}
+}
+
 function pfx2key() {
     if [[ $# -ne 1 ]]; then
         return
@@ -129,6 +150,7 @@ function pfx2key() {
 function pfx2files() {
     pfx2key $@
     pfx2cer $@
+    pfx2chain $@
 }
 
 # any key resumes flow after Ctrl-S, not just Ctrl-Q

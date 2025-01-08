@@ -153,6 +153,7 @@ autocmd FileType * set expandtab tabstop=4 softtabstop=4 shiftwidth=4
 " different settings for file types
 autocmd FileType make set noexpandtab list
 autocmd FileType yaml set expandtab tabstop=2 softtabstop=2 shiftwidth=2
+autocmd FileType yaml.ansible set expandtab tabstop=2 softtabstop=2 shiftwidth=2
 
 autocmd BufNewFile,BufRead *.py
     \ set tabstop=4 |
