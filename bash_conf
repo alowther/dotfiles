@@ -18,38 +18,42 @@ HISTSIZE=10000
 HISTFILESIZE=20000
 
 # SSH agent setup
-IDLIFE=60
-IDLIFE=43720
 function ssha() {
 #    set -x
+    IDLIFE=${IDLIFE:-43720}
+    SSH_AGENT_ARGS="${SSH_AGENT_ARGS} -t ${IDLIFE}"
     # not in $HOME in case of exported /home
-    AGENTFILE=/tmp/ssh-agent-`whoami`
+    SSHA_ENVFILE="${SSHA_ENVFILE:-/tmp/ssh-agent-$(whoami)}"
+    # agent_run_state: 0=agent running w/ key; 1=agent w/o key; 2=agent not running
+    local agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
     # skip agent setup if agent was forwarded
-    /usr/bin/ssh-add -l > /dev/null 2>&1
-    SA_EXIT=$?
-    if [ "$SA_EXIT" -ne "0" ]; then
-        if [ -r $AGENTFILE ]; then
-            . $AGENTFILE > /dev/null
+    if [ $agent_run_state -eq 2 ]; then
+        if [ -r "${SSHA_ENVFILE}" ]; then
+            . "${SSHA_ENVFILE}" > /dev/null
         fi
+        # get agent_run_state again
+        agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
         # if there is no agent, or in case the file is out of date
-        if [ -z "$SSH_AUTH_SOCK" -o ! -r "$SSH_AUTH_SOCK" ]; then
-            AGENTCODE=`ssh-agent -t $IDLIFE`
-            echo $AGENTCODE > $AGENTFILE
-            chmod 600 $AGENTFILE
-            eval `echo $AGENTCODE`
-        else
-            /usr/bin/ssh-add -l > /dev/null 2>&1
-            if [ "${?}" -eq "2" ]; then
-                AGENTCODE=`ssh-agent -t $IDLIFE`
-                echo $AGENTCODE > $AGENTFILE
-                chmod 600 $AGENTFILE
-                eval `echo $AGENTCODE`
-            fi
+        if [ -z "${SSH_AUTH_SOCK}" -o ! -r "${SSH_AUTH_SOCK}" -o $agent_run_state -eq 2 ]; then
+            install -m 0600 /dev/null "${SSHA_ENVFILE}"
+            ssh-agent ${SSH_AGENT_ARGS} >| "${SSHA_ENVFILE}"
+            . "${SSHA_ENVFILE}"
+#        else
+#            /usr/bin/ssh-add -l > /dev/null 2>&1
+#            if [ "${?}" -eq "2" ]; then
+#                AGENTCODE=`ssh-agent -t $IDLIFE`
+#                echo $AGENTCODE > $SSHA_ENVFILE
+#                chmod 600 $SSHA_ENVFILE
+#                eval `echo $AGENTCODE`
+#            fi
         fi
-        # add identity to agent
-        /usr/bin/ssh-add -l > /dev/null 2>&1
-        SA_EXIT=$?
-        if [ "$SA_EXIT" -eq "1" ]; then
+        # get agent_run_state again
+        agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
+#        # add identity to agent
+#        /usr/bin/ssh-add -l > /dev/null 2>&1
+#        SA_EXIT=$?
+#        if [ "$SA_EXIT" -eq "1" ]; then
+        if [ $agent_run_state -eq 1 ]; then
             # only prompt on login, not in every screen window if I'm ignoring it
             if [ "$SHLVL" -eq "0" ]; then
                 echo "no keys in running agent - running ssh-add"
@@ -61,9 +65,9 @@ function ssha() {
     else
         if [ "$SHLVL" -eq "0" ]; then
             # if agent was forwarded make a file old/stale sessions can source to fix themselves
-            echo write ${AGENTFILE}
-            install -m 0600 /dev/null ${AGENTFILE}
-            cat <<EOF > ${AGENTFILE}
+            echo write "${SSHA_ENVFILE}"
+            install -m 0600 /dev/null "${SSHA_ENVFILE}"
+            cat <<EOF > "${SSHA_ENVFILE}"
 SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
 EOF
         fi
@@ -74,15 +78,17 @@ EOF
 # convenience function for shells broken by stale settings
 ssha_fix() {
     ssha
-    source ${AGENTFILE}
+    source ${SSHA_ENVFILE}
 }
 
 # start ssh agent if flag file exists
-[[ -e "${HOME}/.ssha_enable" ]] && ssha
+[[ -e "${HOME}/.ssha_enable" ]] && . .ssha_enable && ssha
 
 # create SSH aliases
 alias on="ssh"
 alias sshpw="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o GSSAPIAuthentication=no"
+alias sshfw="ssh -o ForwardAgent=yes"
+alias don="ssh -l alowther-da"
 alias aon="ssh -l admin"
 alias ron="ssh -l root"
 alias ton="ssh -l twig"
