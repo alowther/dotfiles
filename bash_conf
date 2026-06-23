@@ -82,12 +82,13 @@ ssha_fix() {
 }
 
 # start ssh agent if flag file exists
-[[ -e "${HOME}/.ssha_enable" ]] && . .ssha_enable && ssha
+[[ -e "${HOME}/.ssha_enable" ]] && . ${HOME}/.ssha_enable && ssha
 
 # create SSH aliases
 alias on="ssh"
 alias sshpw="ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o GSSAPIAuthentication=no"
 alias sshfw="ssh -o ForwardAgent=yes"
+alias sshaz="ssh -o ForwardAgent=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l azureuser"
 alias don="ssh -l alowther-da"
 alias aon="ssh -l admin"
 alias ron="ssh -l root"
@@ -200,3 +201,15 @@ alias psc='ps xawf -eo pid,user,cgroup,args'
 
 alias vimf='vim $(find . -type f)'
 alias t0='ssha_fix; tmux a -t 0 || tmux'
+
+if [[ -e "${HOME}/.tmux_autostart" ]] && [[ $- == *i* ]] && [ -z "$TMUX" ] && [[ $TERM_PROGRAM != "vscode" ]]; then
+    tmux new-session -A -s 0
+fi
+
+if [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
+#    export FZF_ALT_C_COMMAND='fdfind --type d --hidden --follow --exclude .git --exclude node_modules --exclude .venv --exclude venv --exclude .vscode-server'
+#    export FZF_ALT_C_COMMAND='fdfind --type d --follow --exclude node_modules --exclude venv'
+    export FZF_ALT_C_COMMAND='fdfind --type d --exclude node_modules --exclude venv'
+    export FZF_CTRL_T_COMMAND='fdfind --type f --type d --exclude node_modules --exclude venv'
+    source /usr/share/doc/fzf/examples/key-bindings.bash
+fi
